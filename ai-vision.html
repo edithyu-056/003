@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Vision</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+/* ===== Reset & Base ===== */
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --bg: #f5f3ef;
+    --text: #1a1a1a;
+    --text-secondary: #6b6b6b;
+    --text-light: #9a9a9a;
+    --accent: #1a1a1a;
+    --card-radius: 16px;
+    --nav-height: 64px;
+    --transition-smooth: cubic-bezier(0.23, 1, 0.32, 1);
+    --transition-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+html, body {
+    height: 100%;
+    overflow: hidden;
+}
+
+body {
+    font-family: 'Space Grotesk', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    cursor: default;
+    user-select: none;
+}
+
+/* ===== 顶部导航 ===== */
+.top-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--nav-height);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 48px;
+    z-index: 100;
+    background: transparent;
+}
+
+.nav-logo {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--text);
+}
+
+.logo-dot {
+    color: #6366f1;
+}
+
+.nav-center {
+    display: flex;
+    gap: 36px;
+}
+
+.nav-link {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2.5px;
+    color: var(--text-light);
+    text-decoration: none;
+    padding: 8px 0;
+    position: relative;
+    transition: color 0.3s ease;
+}
+
+.nav-link:hover {
+    color: var(--text);
+}
+
+.nav-link.active {
+    color: var(--text);
+}
+
+.nav-link.active::after {
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    left: 0;
+    right: 0;
+    height: 1.5px;
+    background: var(--text);
+    border-radius: 1px;
+}
+
+.nav-btn {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    padding: 10px 24px;
+    border: 1.5px solid var(--text);
+    background: transparent;
+    color: var(--text);
+    border-radius: 100px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: inherit;
+}
+
+.nav-btn:hover {
+    background: var(--text);
+    color: var(--bg);
+}
+
+/* ===== 主舞台 ===== */
+.main-stage {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+/* ===== 旋转木马 ===== */
+.carousel-wrapper {
+    width: 100%;
+    height: 55vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    perspective: 1200px;
+    position: relative;
+    margin-top: 20px;
+}
+
+.carousel {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+}
+
+.card {
+    position: absolute;
+    width: 220px;
+    height: 300px;
+    border-radius: var(--card-radius);
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.8s var(--transition-smooth);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+    will-change: transform, opacity, filter;
+    backface-visibility: hidden;
+}
+
+.card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    pointer-events: none;
+}
+
+.card.center {
+    z-index: 10;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+/* 堆叠卡片 */
+.stack-card {
+    position: absolute;
+    width: 220px;
+    height: 300px;
+    border-radius: var(--card-radius);
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    transition: all 0.7s var(--transition-spring);
+    will-change: transform, opacity;
+    pointer-events: none;
+}
+
+.stack-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* ===== 底部文本 ===== */
+.text-section {
+    text-align: center;
+    padding: 0 24px;
+    position: relative;
+    z-index: 20;
+    margin-top: -10px;
+}
+
+.text-lead {
+    font-size: 15px;
+    font-weight: 400;
+    color: var(--text-secondary);
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.text-title {
+    font-size: 52px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -2px;
+    line-height: 1.1;
+    margin-bottom: 14px;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.text-desc {
+    font-size: 15px;
+    font-weight: 400;
+    color: var(--text-secondary);
+    max-width: 480px;
+    margin: 0 auto;
+    line-height: 1.65;
+    letter-spacing: 0.2px;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.text-lead.fade-out,
+.text-title.fade-out,
+.text-desc.fade-out {
+    opacity: 0;
+    transform: translateY(8px);
+}
+
+.text-lead.fade-in,
+.text-title.fade-in,
+.text-desc.fade-in {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ===== 底部指示器 ===== */
+.indicators {
+    display: flex;
+    gap: 8px;
+    margin-top: 32px;
+    z-index: 20;
+}
+
+.indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--text-light);
+    opacity: 0.3;
+    cursor: pointer;
+    transition: all 0.4s ease;
+}
+
+.indicator.active {
+    opacity: 1;
+    background: var(--text);
+    transform: scale(1.2);
+}
+
+.indicator:hover {
+    opacity: 0.6;
+}
+
+/* ===== 响应式 ===== */
+@media (max-width: 1024px) {
+    .card, .stack-card {
+        width: 180px;
+        height: 245px;
+    }
+    .text-title {
+        font-size: 40px;
+    }
+}
+
+@media (max-width: 768px) {
+    .top-nav {
+        padding: 0 24px;
+    }
+    .nav-center {
+        display: none;
+    }
+    .card, .stack-card {
+        width: 150px;
+        height: 205px;
+    }
+    .text-title {
+        font-size: 32px;
+    }
+    .text-desc {
+        font-size: 13px;
+    }
+    .carousel-wrapper {
+        height: 45vh;
+    }
+}
+    </style>
+</head>
+<body>
+    <!-- 顶部导航 -->
+    <nav class="top-nav">
+        <div class="nav-left">
+            <span class="nav-logo">SYNTH<span class="logo-dot">.</span></span>
+        </div>
+        <div class="nav-center">
+            <a href="#" class="nav-link">INTRO</a>
+            <a href="#" class="nav-link active">VISION</a>
+            <a href="#" class="nav-link">INTELLIGENCE</a>
+            <a href="#" class="nav-link">RESEARCH</a>
+            <a href="#" class="nav-link">ABOUT</a>
+        </div>
+        <div class="nav-right">
+            <button class="nav-btn">Get Started</button>
+        </div>
+    </nav>
+
+    <!-- 主展示区域 -->
+    <main class="main-stage">
+        <!-- 3D 旋转木马 -->
+        <div class="carousel-wrapper">
+            <div class="carousel" id="carousel">
+                <!-- 卡片由 JS 动态生成 -->
+            </div>
+        </div>
+
+        <!-- 底部文本区域 -->
+        <div class="text-section">
+            <p class="text-lead" id="textLead">AI is changing the way we approach</p>
+            <h2 class="text-title" id="textTitle">Architecture</h2>
+            <p class="text-desc" id="textDesc">Generative design tools that reimagine spatial planning, structural optimization, and sustainable building practices.</p>
+        </div>
+
+        <!-- 底部指示器 -->
+        <div class="indicators" id="indicators">
+        </div>
+    </main>
+
+    <script>
+// ===== 数据定义 =====
+const slides = [
+    {
+        title: 'Architecture',
+        lead: 'AI is changing the way we approach',
+        desc: 'Generative design tools that reimagine spatial planning, structural optimization, and sustainable building practices.',
+        images: [
+            'https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=600&h=800&fit=crop',
+            'https://images.unsplash.com/photo-1545558014-8692077e9b5c?w=600&h=800&fit=crop',
+            'https://images.unsplash.com/photo-1518005020951-eccb494ad742?w=600&h=800&fit=crop',
+        ],
+        color: '#e8e0d6'
+    },
+    {
+        title: 'Transportation',
+        lead: 'AI is changing the way we approach',
+        desc: 'Autonomous systems and predictive analytics reshaping how people and goods move across the globe.',
+        images: [
+            'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=600&h=800&fit=crop',
+            'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&h=800&fit=crop',
+            'https://images.unsplash.com/photo-1474487548417-781cb71495f3?w=600&h=800&fit=crop',
+        ],
+        color: '#d6dfe8'
+    },
+    {
+        title: 'Agriculture',
+        lead: 'AI is changing the way we approach',
+        desc: 'Precision farming and crop intelligence enabling higher yields with fewer resources and environmental impact.',
+        images: [
+            'https://images.unsplash.com/photo-1500595046743-cd271d694d30?w=600&h=800&fit=crop',
+            'https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=600&h=800&fit=crop',
+            'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=600&h=800&fit=crop',
+        ],
+        color: '#d6e8d9'
+    },
+    {
+        title: 'Healthcare',
+        lead: 'AI is changing the way we approach',
+        desc: 'Diagnostic imaging, drug discovery, and personalized treatment plans powered by deep learning.',
+        images: [
+            'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=600&h=800&fit=crop',
+            'https://images.unsplash.com/photo-1559757175-5700dde675bc?w=600&h=800&fit=crop',
+            'https://images.unsplash.com/photo-1582719471384-894fbb16e074?w=600&h=800&fit=crop',
+        ],
+        color: '#e8d6d6'
+    },
+    {
+        title: 'Marketing',
+        lead: 'AI is changing the way we approach',
+        desc: 'Hyper-personalized campaigns, predictive consumer behavior, and real-time content generation at scale.',
+        images: [
+            'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&h=800&fit=crop',
+            'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=800&fit=crop',
+            'https://images.unsplash.com/photo-1533750349088-cd871a92f312?w=600&h=800&fit=crop',
+        ],
+        color: '#e0d6e8'
+    },
+    {
+        title: 'Education',
+        lead: 'AI is changing the way we approach',
+        desc: 'Adaptive learning paths, intelligent tutoring systems, and automated assessment reshaping how knowledge is delivered.',
+        images: [
+            'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=600&h=800&fit=crop',
+            'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600&h=800&fit=crop',
+            'https://images.unsplash.com/photo-1509062522246-3755977927d7?w=600&h=800&fit=crop',
+        ],
+        color: '#d6e0e8'
+    },
+    {
+        title: 'Finance',
+        lead: 'AI is changing the way we approach',
+        desc: 'Algorithmic trading, fraud detection, and risk assessment models that process millions of data points per second.',
+        images: [
+            'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=600&h=800&fit=crop',
+            'https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?w=600&h=800&fit=crop',
+            'https://images.unsplash.com/photo-1565514020179-026b92b84bb6?w=600&h=800&fit=crop',
+        ],
+        color: '#e8e4d6'
+    },
+    {
+        title: 'Energy',
+        lead: 'AI is changing the way we approach',
+        desc: 'Smart grid optimization, renewable forecasting, and predictive maintenance for sustainable energy infrastructure.',
+        images: [
+            'https://images.unsplash.com/photo-1509391366360-2e959784a276?w=600&h=800&fit=crop',
+            'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=600&h=800&fit=crop',
+            'https://images.unsplash.com/photo-1466611653911-95081537e5b7?w=600&h=800&fit=crop',
+        ],
+        color: '#dde8d6'
+    },
+];
+
+// ===== 状态 =====
+let currentIndex = 0;
+let isAnimating = false;
+let isExpanded = false;
+let autoPlayTimer = null;
+let stackCards = [];
+
+const carousel = document.getElementById('carousel');
+const textLead = document.getElementById('textLead');
+const textTitle = document.getElementById('textTitle');
+const textDesc = document.getElementById('textDesc');
+const indicatorsEl = document.getElementById('indicators');
+
+// ===== 初始化 =====
+function init() {
+    createCards();
+    createIndicators();
+    positionCards();
+    updateText(false);
+    startAutoPlay();
+    setupEvents();
+}
+
+// ===== 创建卡片 =====
+function createCards() {
+    slides.forEach((slide, i) => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.dataset.index = i;
+        const img = document.createElement('img');
+        img.src = slide.images[0];
+        img.alt = slide.title;
+        img.loading = i <= 2 ? 'eager' : 'lazy';
+        card.appendChild(img);
+        carousel.appendChild(card);
+    });
+}
+
+// ===== 创建指示器 =====
+function createIndicators() {
+    slides.forEach((_, i) => {
+        const dot = document.createElement('div');
+        dot.className = 'indicator' + (i === 0 ? ' active' : '');
+        dot.addEventListener('click', () => goTo(i));
+        indicatorsEl.appendChild(dot);
+    });
+}
+
+// ===== 定位卡片 (3D 椭圆轨道) =====
+function positionCards() {
+    const cards = carousel.querySelectorAll('.card');
+    const total = slides.length;
+    const wrapperW = carousel.parentElement.offsetWidth;
+    const wrapperH = carousel.parentElement.offsetHeight;
+    const centerX = wrapperW / 2;
+    const centerY = wrapperH / 2;
+
+    const radiusX = Math.min(wrapperW * 0.42, 560);
+    const radiusZ = 350;
+
+    cards.forEach((card, i) => {
+        const offset = i - currentIndex;
+        let normalizedOffset = offset;
+        if (normalizedOffset > total / 2) normalizedOffset -= total;
+        if (normalizedOffset < -total / 2) normalizedOffset += total;
+
+        const angle = (normalizedOffset / total) * Math.PI * 2;
+
+        const x = Math.sin(angle) * radiusX;
+        const z = Math.cos(angle) * radiusZ - radiusZ;
+
+        const depthNorm = (z + radiusZ) / (radiusZ * 2);
+        const scale = 0.5 + depthNorm * 0.55;
+        const opacity = 0.15 + depthNorm * 0.85;
+        const blur = Math.max(0, (1 - depthNorm) * 3);
+        const rotateY = -normalizedOffset * 8;
+
+        const cardW = card.offsetWidth || 220;
+        const cardH = card.offsetHeight || 300;
+
+        card.style.transform = `translate3d(${centerX + x - cardW / 2}px, ${centerY - cardH / 2}px, ${z}px) rotateY(${rotateY}deg) scale(${scale})`;
+        card.style.opacity = opacity;
+        card.style.filter = blur > 0.3 ? `blur(${blur}px)` : 'none';
+        card.style.zIndex = Math.round(depthNorm * 100);
+
+        if (Math.abs(normalizedOffset) < 0.01) {
+            card.classList.add('center');
+        } else {
+            card.classList.remove('center');
+        }
+    });
+}
+
+// ===== 更新文本 =====
+function updateText(animate = true) {
+    const slide = slides[currentIndex];
+
+    if (!animate) {
+        textLead.textContent = slide.lead;
+        textTitle.textContent = slide.title;
+        textDesc.textContent = slide.desc;
+        return;
+    }
+
+    textLead.classList.add('fade-out');
+    textTitle.classList.add('fade-out');
+    textDesc.classList.add('fade-out');
+
+    setTimeout(() => {
+        textLead.textContent = slide.lead;
+        textTitle.textContent = slide.title;
+        textDesc.textContent = slide.desc;
+
+        textLead.classList.remove('fade-out');
+        textTitle.classList.remove('fade-out');
+        textDesc.classList.remove('fade-out');
+
+        textLead.classList.add('fade-in');
+        textTitle.classList.add('fade-in');
+        textDesc.classList.add('fade-in');
+
+        setTimeout(() => {
+            textLead.classList.remove('fade-in');
+            textTitle.classList.remove('fade-in');
+            textDesc.classList.remove('fade-in');
+        }, 500);
+    }, 350);
+}
+
+// ===== 更新指示器 =====
+function updateIndicators() {
+    const dots = indicatorsEl.querySelectorAll('.indicator');
+    dots.forEach((dot, i) => {
+        dot.classList.toggle('active', i === currentIndex);
+    });
+}
+
+// ===== 切换到指定索引 =====
+function goTo(index) {
+    if (isAnimating || index === currentIndex) return;
+    isAnimating = true;
+
+    collapseStack();
+
+    currentIndex = ((index % slides.length) + slides.length) % slides.length;
+    positionCards();
+    updateText(true);
+    updateIndicators();
+
+    resetAutoPlay();
+
+    setTimeout(() => {
+        isAnimating = false;
+    }, 800);
+}
+
+// ===== 下一张 / 上一张 =====
+function next() {
+    goTo(currentIndex + 1);
+}
+
+function prev() {
+    goTo(currentIndex - 1);
+}
+
+// ===== 堆叠展开 =====
+function expandStack() {
+    if (isExpanded) return;
+    isExpanded = true;
+
+    const slide = slides[currentIndex];
+    const centerCard = carousel.querySelector('.card.center');
+    if (!centerCard) return;
+
+    const rect = centerCard.getBoundingClientRect();
+    const parentRect = carousel.parentElement.getBoundingClientRect();
+
+    const cx = rect.left - parentRect.left + rect.width / 2;
+    const cy = rect.top - parentRect.top + rect.height / 2;
+
+    const offsets = [-170, -85, 85, 170];
+    const rotations = [-6, -3, 3, 6];
+    const stackImages = [slide.images[1], slide.images[2], slide.images[1], slide.images[2]];
+
+    offsets.forEach((offsetX, i) => {
+        const sc = document.createElement('div');
+        sc.className = 'stack-card';
+        const img = document.createElement('img');
+        img.src = stackImages[i];
+        img.alt = '';
+        sc.appendChild(img);
+
+        sc.style.left = `${cx - 110}px`;
+        sc.style.top = `${cy - 150}px`;
+        sc.style.transform = `translateX(0px) rotate(0deg) scale(0.85)`;
+        sc.style.opacity = '0';
+        sc.style.zIndex = 5;
+
+        carousel.parentElement.appendChild(sc);
+        stackCards.push(sc);
+
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                sc.style.opacity = '0.85';
+                sc.style.transform = `translateX(${offsetX}px) rotate(${rotations[i]}deg) scale(0.88)`;
+            });
+        });
+    });
+}
+
+function collapseStack() {
+    if (!isExpanded) return;
+    isExpanded = false;
+
+    stackCards.forEach((sc) => {
+        sc.style.transform = `translateX(0px) rotate(0deg) scale(0.7)`;
+        sc.style.opacity = '0';
+        setTimeout(() => sc.remove(), 700);
+    });
+    stackCards = [];
+}
+
+function toggleStack() {
+    if (isExpanded) {
+        collapseStack();
+    } else {
+        expandStack();
+    }
+}
+
+// ===== 自动播放 =====
+function startAutoPlay() {
+    autoPlayTimer = setInterval(() => {
+        if (!isExpanded) next();
+    }, 4000);
+}
+
+function resetAutoPlay() {
+    clearInterval(autoPlayTimer);
+    startAutoPlay();
+}
+
+// ===== 事件绑定 =====
+function setupEvents() {
+    carousel.addEventListener('click', (e) => {
+        const card = e.target.closest('.card');
+        if (!card) return;
+
+        const idx = parseInt(card.dataset.index);
+
+        if (idx === currentIndex) {
+            toggleStack();
+        } else {
+            goTo(idx);
+        }
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight') next();
+        else if (e.key === 'ArrowLeft') prev();
+        else if (e.key === ' ') { e.preventDefault(); toggleStack(); }
+    });
+
+    let wheelTimeout;
+    document.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        clearTimeout(wheelTimeout);
+        wheelTimeout = setTimeout(() => {
+            if (e.deltaX > 30 || e.deltaY > 30) next();
+            else if (e.deltaX < -30 || e.deltaY < -30) prev();
+        }, 50);
+    }, { passive: false });
+
+    let touchStartX = 0;
+    let touchStartY = 0;
+
+    document.addEventListener('touchstart', (e) => {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+    }, { passive: true });
+
+    document.addEventListener('touchend', (e) => {
+        const dx = e.changedTouches[0].clientX - touchStartX;
+        const dy = e.changedTouches[0].clientY - touchStartY;
+        if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
+            if (dx < 0) next();
+            else prev();
+        }
+    }, { passive: true });
+
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+            collapseStack();
+            positionCards();
+        }, 200);
+    });
+}
+
+// ===== 启动 =====
+init();
+    </script>
+</body>
+</html>
